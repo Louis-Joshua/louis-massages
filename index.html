@@ -1,0 +1,647 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Louis Messages</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #210936;
+    color: white;
+}
+
+header {
+    background: #4c1675;
+    padding: 18px;
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.card {
+    background: #32104b;
+    padding: 20px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+}
+
+.hidden { display: none !important; }
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 7px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+button {
+    background: #a855f7;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    margin: 5px 3px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover { background: #c084fc; }
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: #32104b;
+    padding: 10px;
+}
+
+nav button { background: #54217a; }
+
+.profile-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #54217a;
+}
+
+.account-item, .chat-user {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #54217a;
+    margin: 8px 0;
+    padding: 12px;
+}
+
+.chat-layout {
+    display: flex;
+    gap: 15px;
+    min-height: 400px;
+}
+
+.chat-users {
+    width: 30%;
+    min-width: 150px;
+    background: #210936;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.chat-window {
+    flex: 1;
+    min-width: 0;
+    background: #210936;
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    border-bottom: 1px solid #70409a;
+    padding-bottom: 10px;
+}
+
+.chat-messages {
+    flex: 1;
+    min-height: 250px;
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.message {
+    background: #70409a;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 8px 0;
+    max-width: 80%;
+    overflow-wrap: anywhere;
+}
+
+.my-message {
+    background: #a855f7;
+    margin-left: auto;
+}
+
+.chat-input {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input input { flex: 1; }
+
+.chat-input button { flex-shrink: 0; }
+
+.status-online { color: #4ade80; }
+.status-offline { color: #d1d5db; }
+
+#notice {
+    text-align: center;
+    color: #f0abfc;
+    min-height: 22px;
+}
+
+@media(max-width: 600px) {
+    .chat-layout { flex-direction: column; }
+    .chat-users { width: 100%; }
+}
+</style>
+</head>
+
+<body>
+
+<header>💜 LOUIS MESSAGES</header>
+<div id="notice"></div>
+
+<!-- REGISTER AND LOGIN -->
+<div class="container" id="authSection">
+
+    <div class="card">
+        <h2>Create Account</h2>
+        <input id="newUsername" placeholder="Choose username">
+        <input id="newPassword" type="password" placeholder="Choose password">
+        <button onclick="createAccount()">Create Account</button>
+    </div>
+
+    <div class="card">
+        <h2>Login</h2>
+        <input id="loginUsername" placeholder="Username">
+        <input id="loginPassword" type="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+</div>
+
+<!-- MAIN WEBSITE -->
+<div id="dashboard" class="hidden">
+
+    <nav>
+        <button onclick="showSection('home')">Home</button>
+        <button onclick="showSection('profile')">My Profile</button>
+        <button onclick="showSection('accounts')">Accounts</button>
+        <button onclick="showSection('messages')">Messages</button>
+        <button onclick="logout()">Log Out</button>
+    </nav>
+
+    <div class="container">
+
+        <!-- HOME -->
+        <div class="card" id="homeSection">
+            <h2>Welcome to Louis Messages 💜</h2>
+            <p>Connect with other accounts and enjoy messaging.</p>
+            <p id="welcomeText"></p>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="card hidden" id="profileSection">
+            <h2>My Profile</h2>
+
+            <img id="profilePicture"
+                 class="profile-picture"
+                 alt="Profile picture">
+
+            <p>Change profile picture:</p>
+            <input type="file" id="pictureInput" accept="image/*">
+
+            <h3 id="profileUsername"></h3>
+
+            <textarea id="profileBio"
+                      placeholder="Write something about yourself"></textarea>
+
+            <label>
+                <input type="checkbox" id="onlineCheckbox"
+                       style="width:auto">
+                Show me as Online
+            </label>
+
+            <br>
+            <button onclick="saveProfile()">Save Profile</button>
+        </div>
+
+        <!-- ACCOUNTS -->
+        <div class="card hidden" id="accountsSection">
+            <h2>Accounts</h2>
+            <input id="accountSearch"
+                   placeholder="Search usernames..."
+                   oninput="showAccounts()">
+            <div id="accountsList"></div>
+        </div>
+
+        <!-- MESSAGES -->
+        <div class="card hidden" id="messagesSection">
+            <h2>💬 Louis Messages</h2>
+
+            <div class="chat-layout">
+
+                <div class="chat-users">
+                    <h3>Accounts</h3>
+                    <div id="chatUserList"></div>
+                </div>
+
+                <div class="chat-window">
+
+                    <div class="chat-header">
+                        <h3 id="chatUsername">Select an account</h3>
+                        <span id="chatStatus"></span>
+                    </div>
+
+                    <div id="chatMessages" class="chat-messages">
+                        <p>Select an account to start chatting.</p>
+                    </div>
+
+                    <div class="chat-input">
+                        <input id="messageInput"
+                               placeholder="Write a message..."
+                               onkeydown="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()">Send</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+// ACCOUNT STORAGE
+
+function getAccounts() {
+    return JSON.parse(localStorage.getItem("louisAccounts") || "[]");
+}
+
+function saveAccounts(accounts) {
+    localStorage.setItem("louisAccounts", JSON.stringify(accounts));
+}
+
+function currentAccount() {
+    const username = localStorage.getItem("louisCurrentUser");
+    return getAccounts().find(a => a.username === username);
+}
+
+function notify(message) {
+    document.getElementById("notice").textContent = message;
+}
+
+// CREATE ACCOUNT
+
+function createAccount() {
+    const username = document.getElementById("newUsername").value.trim();
+    const password = document.getElementById("newPassword").value;
+
+    if (!username || !password) {
+        notify("Please enter a username and password.");
+        return;
+    }
+
+    const accounts = getAccounts();
+
+    if (accounts.some(a => a.username.toLowerCase() === username.toLowerCase())) {
+        notify("That username already exists.");
+        return;
+    }
+
+    accounts.push({
+        username: username,
+        password: password,
+        bio: "",
+        picture: "",
+        online: false
+    });
+
+    saveAccounts(accounts);
+
+    document.getElementById("newUsername").value = "";
+    document.getElementById("newPassword").value = "";
+
+    notify("Account created! You can now log in.");
+}
+
+// LOGIN
+
+function login() {
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    const account = getAccounts().find(
+        a => a.username.toLowerCase() === username.toLowerCase()
+        && a.password === password
+    );
+
+    if (!account) {
+        notify("Incorrect username or password.");
+        return;
+    }
+
+    localStorage.setItem("louisCurrentUser", account.username);
+
+    account.online = true;
+    saveAccounts(getAccounts().map(a =>
+        a.username === account.username ? account : a
+    ));
+
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    document.getElementById("welcomeText").textContent =
+        "Welcome, " + account.username + "!";
+
+    loadProfile();
+    showSection("home");
+    notify("Login successful!");
+}
+
+// NAVIGATION
+
+function showSection(section) {
+    const sections = [
+        "homeSection",
+        "profileSection",
+        "accountsSection",
+        "messagesSection"
+    ];
+
+    sections.forEach(id =>
+        document.getElementById(id).classList.add("hidden")
+    );
+
+    document.getElementById(section + "Section").classList.remove("hidden");
+
+    if (section === "profile") loadProfile();
+    if (section === "accounts") showAccounts();
+
+    if (section === "messages") {
+        loadChatUsers();
+        displayMessages();
+    }
+}
+
+// PROFILE
+
+function loadProfile() {
+    const account = currentAccount();
+    if (!account) return;
+
+    document.getElementById("profileUsername").textContent = account.username;
+    document.getElementById("profileBio").value = account.bio || "";
+    document.getElementById("onlineCheckbox").checked = !!account.online;
+    document.getElementById("profilePicture").src =
+        account.picture || "data:image/svg+xml," +
+        encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="#54217a"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="35">👤</text></svg>');
+}
+
+function saveProfile() {
+    const account = currentAccount();
+    if (!account) return;
+
+    account.bio = document.getElementById("profileBio").value;
+    account.online = document.getElementById("onlineCheckbox").checked;
+
+    const accounts = getAccounts().map(a =>
+        a.username === account.username ? account : a
+    );
+
+    saveAccounts(accounts);
+    loadProfile();
+    notify("Profile saved!");
+    loadChatUsers();
+}
+
+document.getElementById("pictureInput").addEventListener("change", function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        notify("Please choose an image.");
+        return;
+    }
+
+    if (file.size > 1024 * 1024) {
+        notify("Please choose an image smaller than 1 MB.");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function() {
+        const account = currentAccount();
+        if (!account) return;
+
+        account.picture = reader.result;
+
+        saveAccounts(getAccounts().map(a =>
+            a.username === account.username ? account : a
+        ));
+
+        loadProfile();
+        notify("Profile picture updated!");
+    };
+
+    reader.readAsDataURL(file);
+});
+
+// ACCOUNT DIRECTORY
+
+function showAccounts() {
+    const list = document.getElementById("accountsList");
+    const search = document.getElementById("accountSearch").value.toLowerCase();
+    const current = currentAccount();
+
+    list.innerHTML = "";
+
+    getAccounts().forEach(account => {
+        if (current && account.username === current.username) return;
+
+        if (!account.username.toLowerCase().includes(search)) return;
+
+        const button = document.createElement("button");
+        button.className = "account-item";
+        button.textContent = account.username +
+            (account.online ? " 🟢 Online" : " ⚪ Offline");
+
+        list.appendChild(button);
+    });
+}
+
+// MESSAGING
+
+let selectedChat = "";
+
+function getAllMessages() {
+    return JSON.parse(localStorage.getItem("louisMessages") || "{}");
+}
+
+function saveAllMessages(messages) {
+    localStorage.setItem("louisMessages", JSON.stringify(messages));
+}
+
+function getChatKey(user1, user2) {
+    return [user1, user2].sort().join("|||");
+}
+
+function loadChatUsers() {
+    const accounts = getAccounts();
+    const current = currentAccount();
+    const list = document.getElementById("chatUserList");
+
+    list.innerHTML = "";
+
+    accounts.forEach(account => {
+        if (!current || account.username === current.username) return;
+
+        const button = document.createElement("button");
+        button.className = "chat-user";
+        button.textContent = account.username +
+            (account.online ? " 🟢 Online" : " ⚪ Offline");
+
+        button.onclick = () => openChat(account.username);
+
+        list.appendChild(button);
+    });
+}
+
+function openChat(username) {
+    selectedChat = username;
+
+    document.getElementById("chatUsername").textContent = username;
+
+    const account = getAccounts().find(a => a.username === username);
+
+    const status = document.getElementById("chatStatus");
+    status.textContent = account && account.online ? "🟢 Online" : "⚪ Offline";
+    status.className = account && account.online
+        ? "status-online" : "status-offline";
+
+    displayMessages();
+}
+
+function displayMessages() {
+    const area = document.getElementById("chatMessages");
+    const current = currentAccount();
+
+    if (!current || !selectedChat) return;
+
+    const messages = getAllMessages();
+    const chatKey = getChatKey(current.username, selectedChat);
+
+    area.innerHTML = "";
+
+    (messages[chatKey] || []).forEach(message => {
+        const bubble = document.createElement("div");
+
+        bubble.className = "message" +
+            (message.sender === current.username ? " my-message" : "");
+
+        const sender = document.createElement("strong");
+        sender.textContent = message.sender + ": ";
+
+        const content = document.createElement("span");
+        content.textContent = message.text;
+
+        const time = document.createElement("small");
+        time.style.display = "block";
+        time.style.marginTop = "5px";
+        time.textContent = new Date(message.time).toLocaleString();
+
+        bubble.appendChild(sender);
+        bubble.appendChild(content);
+        bubble.appendChild(time);
+
+        area.appendChild(bubble);
+    });
+
+    if (!messages[chatKey] || messages[chatKey].length === 0) {
+        area.textContent = "No messages yet. Say hello!";
+    }
+
+    area.scrollTop = area.scrollHeight;
+}
+
+function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    const current = currentAccount();
+
+    if (!current || !selectedChat || !text) {
+        notify("Choose an account and write a message.");
+        return;
+    }
+
+    const messages = getAllMessages();
+    const chatKey = getChatKey(current.username, selectedChat);
+
+    if (!messages[chatKey]) messages[chatKey] = [];
+
+    messages[chatKey].push({
+        sender: current.username,
+        text: text,
+        time: new Date().toISOString()
+    });
+
+    saveAllMessages(messages);
+
+    input.value = "";
+    displayMessages();
+}
+
+// LOG OUT
+
+function logout() {
+    const account = currentAccount();
+
+    if (account) {
+        account.online = false;
+
+        saveAccounts(getAccounts().map(a =>
+            a.username === account.username ? account : a
+        ));
+    }
+
+    localStorage.removeItem("louisCurrentUser");
+
+    selectedChat = "";
+
+    document.getElementById("dashboard").classList.add("hidden");
+    document.getElementById("authSection").classList.remove("hidden");
+
+    notify("You have logged out.");
+}
+
+// RESTORE LOGIN AFTER REFRESH
+
+window.addEventListener("load", function() {
+    const account = currentAccount();
+
+    if (account) {
+        document.getElementById("authSection").classList.add("hidden");
+        document.getElementById("dashboard").classList.remove("hidden");
+
+        document.getElementById("welcomeText").textContent =
+            "Welcome, " + account.username + "!";
+
+        loadProfile();
+        showSection("home");
+    }
+});
+
+</script>
+
+</body>
+</html>
